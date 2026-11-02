@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE public.products
+    ADD COLUMN IF NOT EXISTS category VARCHAR(80) NOT NULL DEFAULT 'Uncategorized',
+    ADD COLUMN IF NOT EXISTS images JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+COMMIT;

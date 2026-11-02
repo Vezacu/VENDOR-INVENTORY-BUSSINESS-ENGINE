@@ -1,0 +1,119 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Fredoka:wght@300..700&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Poppins', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --font-comic: 'Bangers', 'Comic Neue', cursive;
+  --font-display: 'Fredoka', 'Comic Neue', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+
+  /* Light theme: Forest & Clay */
+  --bg: #F2F0E7;
+  --surface: #FBFAF6;
+  --surface-alt: #E5E9DF;
+  --text: #303B35;
+  --muted: #70796F;
+  --primary: #8DA28A;
+  --primary-hover: #788F75;
+  --accent: #C77D5B;
+  --accent-soft: #F0DDD1;
+  --secondary: #9BB9B0;
+  --highlight: #C6A477;
+  --border: #465348;
+  --button-text: #253129;
+  --shadow: #465348;
+  --card-pink: #EBD9D0;
+  --card-lavender: #D9DED5;
+  --card-sage: #D6E1D1;
+  --card-coral: #E8D2C2;
+  --banner: #DCE5D6;
+  --hero-art: #D6E1D1;
+  --nav-bg: #F8F7F0;
+  --footer-bg: #E8EAE1;
+
+  color: var(--text);
+  background: var(--bg);
+}
+
+body.dark {
+  /* Dark theme: Modern Sketchbook */
+  --bg: #20252A;
+  --surface: #2B3137;
+  --surface-alt: #343D43;
+  --text: #F0F1ED;
+  --muted: #B5BEC1;
+  --primary: #A8B5A0;
+  --primary-hover: #BDCCB5;
+  --accent: #D48B6A;
+  --accent-soft: #493832;
+  --secondary: #91B7C4;
+  --highlight: #D8C5A5;
+  --border: #89969B;
+  --button-text: #20252A;
+  --shadow: #11161A;
+  --card-pink: #493A3A;
+  --card-lavender: #3D414F;
+  --card-sage: #34443E;
+  --card-coral: #4A3932;
+  --banner: #343F3B;
+  --hero-art: #38454A;
+  --nav-bg: #252B30;
+  --footer-bg: #252B30;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+.comic-font {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+#root {
+  min-height: 100vh;
+}
