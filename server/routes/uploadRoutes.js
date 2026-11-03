@@ -1,6 +1,12 @@
 const express = require("express");
 const multer = require("multer");
-const { uploadProductImage, uploadReviewImage, uploadCustomOrderImage, uploadCustomerAvatar } = require("../controllers/uploadController");
+const {
+    createUploadSignature,
+    uploadProductImage,
+    uploadReviewImage,
+    uploadCustomOrderImage,
+    uploadCustomerAvatar
+} = require("../controllers/uploadController");
 const { requireAuth, requireRole } = require("../middleware/requireAuth");
 
 const router = express.Router();
@@ -15,6 +21,8 @@ const upload = multer({
         return callback(null, true);
     }
 });
+
+router.post("/signature", requireAuth, createUploadSignature);
 
 router.post(
     "/products",

@@ -64,6 +64,44 @@ const readApiResponse = async (response) => {
   }
 };
 
+const uploadImage = async (file, kind, authToken) => {
+  if (!file) throw new Error("Choose an image to upload.");
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new Error("Choose a JPG, PNG, or WebP image.");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Images must be 5 MB or smaller.");
+  }
+
+  const signatureResponse = await apiFetch("http://localhost:5000/api/uploads/signature", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ kind }),
+  });
+  const signature = await readApiResponse(signatureResponse);
+  if (!signatureResponse.ok) {
+    throw new Error(signature.message || "The image could not be uploaded.");
+  }
+
+  const body = new FormData();
+  body.append("file", file);
+  body.append("api_key", signature.apiKey);
+  body.append("timestamp", String(signature.timestamp));
+  body.append("folder", signature.folder);
+  body.append("public_id", signature.public_id);
+  body.append("signature", signature.signature);
+
+  const response = await fetch(signature.uploadUrl, { method: "POST", body });
+  const result = await readApiResponse(response);
+  if (!response.ok) {
+    throw new Error(result.error?.message || "The image could not be uploaded. Please try again.");
+  }
+  return { image: { url: result.secure_url, publicId: result.public_id } };
+};
+
 const readStorage = (key, fallback) => {
   try {
     const saved = localStorage.getItem(key);
@@ -661,15 +699,7 @@ function StorefrontLiveEditor({ shop, authUser, authToken, page, onPreview = () 
     setUploading(true);
     setError("");
     try {
-      const body = new FormData();
-      body.append("image", file);
-      const response = await apiFetch("http://localhost:5000/api/uploads/products", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${authToken}` },
-        body,
-      });
-      const result = await readApiResponse(response);
-      if (!response.ok) throw new Error(result.message || "The image could not be uploaded.");
+      const result = await uploadImage(file, "product", authToken);
       if (target === "hero") setHeroImage(result.image.url);
       else changeField("logoImage", result.image.url);
     } catch (uploadError) {
@@ -1021,15 +1051,7 @@ function CustomOrderPage({ path, setNotice, notice, shop: storefrontShop, authUs
     try {
       const uploaded = [];
       for (const file of files) {
-        const body = new FormData();
-        body.append("image", file);
-        const response = await apiFetch("http://localhost:5000/api/uploads/custom-orders", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${authToken}` },
-          body,
-        });
-        const result = await readApiResponse(response);
-        if (!response.ok) throw new Error(result.message || "An idea image could not be uploaded.");
+        const result = await uploadImage(file, "customOrder", authToken);
         uploaded.push(result.image.url);
       }
       setIdeaImages((current) => [...current, ...uploaded]);
@@ -1440,15 +1462,7 @@ function CustomerAccountPage({ authUser, authToken, setAuthUser, accountSessions
     setNotice("");
     setUploading(true);
     try {
-      const body = new FormData();
-      body.append("image", file);
-      const response = await apiFetch("http://localhost:5000/api/uploads/customer-avatar", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${authToken}` },
-        body,
-      });
-      const result = await readApiResponse(response);
-      if (!response.ok) throw new Error(result.message || "Your profile image could not be uploaded.");
+      const result = await uploadImage(file, "customerAvatar", authToken);
       setProfile((current) => ({ ...current, profileImage: result.image.url }));
       setNotice("Profile image uploaded. Save your profile to keep this change.");
     } catch (uploadError) {
@@ -1721,15 +1735,7 @@ function ReviewForm({ orderId, item, authToken, onSaved }) {
     try {
       const uploaded = [];
       for (const file of files) {
-        const body = new FormData();
-        body.append("image", file);
-        const response = await apiFetch("http://localhost:5000/api/uploads/reviews", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${authToken}` },
-          body,
-        });
-        const result = await readApiResponse(response);
-        if (!response.ok) throw new Error(result.message || "A review image could not be uploaded.");
+        const result = await uploadImage(file, "review", authToken);
         uploaded.push(result.image.url);
       }
       setImages((current) => [...current, ...uploaded]);
@@ -2344,15 +2350,7 @@ function ProductEditDialog({ product, authToken, onClose, onSaved }) {
     setUploading(true);
     try {
     for (const file of files) {
-      const body = new FormData();
-      body.append("image", file);
-      const response = await apiFetch("http://localhost:5000/api/uploads/products", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${authToken}` },
-        body,
-      });
-      const result = await readApiResponse(response);
-      if (!response.ok) throw new Error(result.message || "A product photo could not be uploaded.");
+      const result = await uploadImage(file, "product", authToken);
       setImages((current) => [...current, result.image.url]);
     }
     } catch (uploadError) {
@@ -2462,15 +2460,7 @@ function ProductForm({ navigate, authToken, authUser, editing = false }) {
     setUploading(true);
     try {
       for (const file of selectedFiles) {
-        const body = new FormData();
-        body.append("image", file);
-        const response = await apiFetch("http://localhost:5000/api/uploads/products", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${authToken}` },
-          body,
-        });
-        const result = await readApiResponse(response);
-        if (!response.ok) throw new Error(result.message || "The image could not be uploaded.");
+        const result = await uploadImage(file, "product", authToken);
         setPhotos((current) => [...current, result.image]);
       }
     } catch (error) {
@@ -3044,15 +3034,7 @@ function ShopSettingsPage({ authToken }) {
     setUploading(true);
     setError("");
     try {
-      const body = new FormData();
-      body.append("image", file);
-      const response = await apiFetch("http://localhost:5000/api/uploads/products", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${authToken}` },
-        body,
-      });
-      const result = await readApiResponse(response);
-      if (!response.ok) throw new Error(result.message || "The artwork could not be uploaded.");
+      const result = await uploadImage(file, "product", authToken);
       setHeroImage(result.image.url);
       setSaved(false);
     } catch (requestError) {
