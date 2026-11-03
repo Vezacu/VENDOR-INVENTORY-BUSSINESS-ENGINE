@@ -4,10 +4,17 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "client/dist",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/:path((?!api/).*)",
-      "destination": "/index.html"
+      "src": "^/api/(.*)$",
+      "dest": "/api/index?__vibe_original_path=$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
