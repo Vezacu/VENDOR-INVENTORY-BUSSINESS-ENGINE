@@ -41,8 +41,10 @@ const dashboardPages = {
 };
 
 const money = (amount) => `₹${Number(amount).toLocaleString("en-IN")}`;
+const API_BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
 const apiFetch = async (url, options = {}) => {
-  const response = await fetch(url, options);
+  const requestUrl = url.replace("http://localhost:5000", API_BASE_URL);
+  const response = await fetch(requestUrl, options);
   const headers = new Headers(options.headers || {});
   if (response.status === 401 && headers.has("Authorization")) {
     window.dispatchEvent(new CustomEvent("vibe-session-expired"));

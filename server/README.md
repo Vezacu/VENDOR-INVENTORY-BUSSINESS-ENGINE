@@ -1,22 +1,24 @@
-# VIBE server setup
+# VIBE server reference
 
-Apply `database.sql` to a new database. For an existing database, apply the migrations in order:
+The client and server are deployed together from the repository root. For root-level install, build, development, and deployment commands, see the [project README](../README.md). Copy the root `.env.example` to `.env`; do not commit real credentials.
 
-1. `migrations/001_user_roles_and_single_admin.sql`
-2. `migrations/002_product_categories_and_images.sql`
-3. `migrations/003_customer_profiles_and_shop_pages.sql`
-4. `migrations/004_single_seller_and_catalog.sql`
-5. `migrations/005_razorpay_checkout.sql`
-6. `migrations/006_order_tracking_and_refunds.sql`
-7. `migrations/007_product_reviews_and_custom_orders.sql`
-8. `migrations/008_custom_order_payment_items.sql`
-9. `migrations/009_custom_order_mail_read_status.sql`
-10. `migrations/010_customer_hidden_custom_orders.sql`
-11. `migrations/011_customer_profile_images.sql`
+Apply `server/database.sql` to a new database. For an existing database, apply the migrations in order from `server/migrations`:
+
+1. `server/migrations/001_user_roles_and_single_admin.sql`
+2. `server/migrations/002_product_categories_and_images.sql`
+3. `server/migrations/003_customer_profiles_and_shop_pages.sql`
+4. `server/migrations/004_single_seller_and_catalog.sql`
+5. `server/migrations/005_razorpay_checkout.sql`
+6. `server/migrations/006_order_tracking_and_refunds.sql`
+7. `server/migrations/007_product_reviews_and_custom_orders.sql`
+8. `server/migrations/008_custom_order_payment_items.sql`
+9. `server/migrations/009_custom_order_mail_read_status.sql`
+10. `server/migrations/010_customer_hidden_custom_orders.sql`
+11. `server/migrations/011_customer_profile_images.sql`
 
 The third migration also adds unique public shop slugs to existing seller shops. The fourth migration keeps the oldest seller account, moves products and order records from other seller shops into that seller's shop, and removes the additional seller accounts and shops. It then enforces the one-seller limit. Available, in-stock products remain visible in the public shop; hidden and out-of-stock products are not included in the customer catalog.
 
-Set `DATABASE_URL` and `JWT_SECRET` before starting the server. To reset the existing admin password, set `ADMIN_PASSWORD` (at least 8 characters) in your local PowerShell session, then run `npm run setup-admin` from this directory. The command updates the one existing admin account and prints its login email; no existing email or password is needed. Optionally set `ADMIN_EMAIL` to change the login email and `ADMIN_NAME` to change the display name. The command will refuse to use an email already assigned to another account.
+Set `DATABASE_URL` and `JWT_SECRET` in the root `.env` or the deployment platform's environment settings. To reset the existing admin password, set `ADMIN_PASSWORD` (at least 8 characters) in your local PowerShell session, then run `npm run setup-admin` from the repository root. The command updates the one existing admin account and prints its login email; no existing email or password is needed. Optionally set `ADMIN_EMAIL` to change the login email and `ADMIN_NAME` to change the display name. The command will refuse to use an email already assigned to another account.
 
 ```powershell
 $env:ADMIN_PASSWORD = Read-Host "New admin password"
@@ -31,11 +33,11 @@ To create the first admin account instead, also set `ADMIN_NAME` and `ADMIN_EMAI
 
 The admin can create one seller account. Customer accounts can be self-registered without a limit and can save delivery details for future orders.
 
-Start the backend from this `server` directory with `npm start` (or use `npm run dev` while developing). The React client expects the API at `http://localhost:5000`.
+Run both applications for local development with `npm run dev` from the repository root. `npm start` from the root starts the API and serves the production client build from `client/dist`. During development, the client connects to the API at `http://localhost:5000`.
 
 ## Razorpay test checkout
 
-Apply `migrations/005_razorpay_checkout.sql` after the earlier migrations, then configure `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in the server's local `.env` using Razorpay **Test Mode** credentials. Use a key ID beginning with `rzp_test_`; the backend refuses live-mode key IDs. Keep `.env` local and never place the key secret in client configuration or source control. `.env.example` contains placeholders only.
+Apply `server/migrations/005_razorpay_checkout.sql` after the earlier migrations, then configure `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in the root `.env` or the deployment platform's environment settings using Razorpay **Test Mode** credentials. Use a key ID beginning with `rzp_test_`; the backend refuses live-mode key IDs. Keep `.env` local and never place the key secret in client configuration or source control. The root `.env.example` contains placeholders only.
 
 The customer checkout creates an order through `POST /api/payment/create-order`, then verifies the returned Checkout signature and captured payment through `POST /api/payment/verify`. Product prices and stock are checked on the backend. Stock is reserved for 15 minutes while checkout is pending and released automatically when that session expires. A successful Test Mode payment is recorded as paid and the order moves to processing; Test Mode does not transfer funds to the seller. Razorpay Standard Checkout presents payment methods available to the account, including supported UPI options.
 
